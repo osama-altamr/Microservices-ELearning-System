@@ -8,7 +8,6 @@ import com.elearning.user_service.model.dto.response.LoginResponse;
 import com.elearning.user_service.model.dto.response.RefreshTokenResponse;
 import com.elearning.user_service.model.dto.response.UserResponse;
 import com.elearning.user_service.model.entity.User;
-import com.elearning.user_service.model.enums.Role;
 import com.elearning.user_service.model.mapper.UserMapper;
 import com.elearning.user_service.repository.UserRepo;
 import com.elearning.user_service.service.AuthService;

@@ -1,7 +1,6 @@
 package com.elearning.user_service.service.impl;
 
 import com.elearning.user_service.model.dto.request.AdminRequest;
-import com.elearning.user_service.model.dto.request.UserRequest;
 import com.elearning.user_service.model.dto.response.UserResponse;
 import com.elearning.user_service.model.entity.User;
 import com.elearning.user_service.model.mapper.UserMapper;

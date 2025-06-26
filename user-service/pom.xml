@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.1</version>
+		<version>3.2.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	
@@ -28,7 +28,7 @@
 		<lombok.version>1.18.30</lombok.version>
 	</properties>
 	
-	  <dependencyManagement>
+			  <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -46,15 +46,14 @@
     </dependencyManagement>
 
 
+	
+
 	<dependencies>
 
-      
-		<dependency>
+	<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
-
-    
 		<!-- Core dependencies for a web service with a database and security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -146,11 +145,7 @@
 
 	<build>
 		<plugins>
-			<!-- 
-				This is the essential plugin for building and running a Spring Boot application.
-				Your previous error ("No plugin found for prefix 'spring-boot'") was because this was missing.
-				You have correctly added it.
-			-->
+		
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -164,6 +159,37 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			       <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <!-- This is needed when using Lombok 1.18.16 and above -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${mapstruct-lombok.version}</version>
+                        </path>
+                        <!-- Mapstruct should follow the lombok path(s) -->
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
+                        <arg>-Amapstruct.defaultComponentModel=spring</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 
