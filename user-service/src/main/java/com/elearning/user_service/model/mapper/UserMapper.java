@@ -18,9 +18,7 @@ public abstract class UserMapper {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     public abstract UserResponse toDto(User entity);
-
     public abstract List<UserResponse> toDtos(List<User> entities);
 
     @Mapping(target = "enabled", constant = "true")
