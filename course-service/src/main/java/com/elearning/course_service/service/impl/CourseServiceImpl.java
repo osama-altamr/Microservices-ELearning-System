@@ -9,6 +9,8 @@ import com.elearning.course_service.model.mapper.CourseMapper;
 import com.elearning.course_service.repository.CourseRepo;
 import com.elearning.course_service.service.CourseService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional; 
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,18 +19,21 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepo repo;
     private final CourseMapper mapper;
 
     @Override
+    @Transactional(readOnly = true) 
     public List<CourseResponse> findAllApprovedCourses() {
         List<Course> courses = repo.findByStatus(CourseStatus.APPROVED);
         return mapper.toDtos(courses);
     }
 
     @Override
+    @Transactional(readOnly = true) 
     public List<CourseResponse> findMyCourses() {
         Long instructorId = getCurrentUserId(); // Helper method to get user ID from token
         List<Course> courses = repo.findByInstructorId(instructorId);
@@ -36,8 +41,9 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional(readOnly = true) 
     public List<CourseResponse> findAllPendingCourses() {
-        List<Course> courses = repo.findByStatus(CourseStatus.PENDING_APPROVAL);
+        List<Course> courses = repo.findByStatus(CourseStatus.PENDING);
         return mapper.toDtos(courses);
     }
 
@@ -46,7 +52,7 @@ public class CourseServiceImpl implements CourseService {
         Long instructorId = getCurrentUserId();
         Course course = mapper.toEntity(request);
         course.setInstructorId(instructorId);
-        course.setStatus(CourseStatus.PENDING_APPROVAL); // New courses are always pending
+        course.setStatus(CourseStatus.PENDING); // New courses are always pending
         Course savedCourse = repo.save(course);
         return mapper.toDto(savedCourse);
     }
@@ -83,8 +89,6 @@ public class CourseServiceImpl implements CourseService {
 
     // Helper method to extract User ID from the JWT token
     private Long getCurrentUserId() {
-        // In a real app, you would parse the JWT from the SecurityContext
-        // For now, we assume the 'name' of the authentication principal is the user ID string
         String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
         return Long.parseLong(userIdStr);
     }

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -25,7 +27,7 @@ public class Submission {
     private Long userId;
 
     @Column(nullable = false)
-    private Integer score; // e.g., number of correct answers
+    private Integer score;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -33,4 +35,18 @@ public class Submission {
 
     @CreationTimestamp
     private LocalDateTime submittedAt;
+
+        @OneToMany(
+            mappedBy = "submission",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @Builder.Default // Ensure the list is initialized by the builder
+    private List<SubmittedAnswer> submittedAnswers = new ArrayList<>();
+
+    public void addSubmittedAnswer(SubmittedAnswer answer) {
+        submittedAnswers.add(answer);
+        answer.setSubmission(this);
+    }
 }

@@ -41,20 +41,22 @@ public class CourseController {
     @PostMapping
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     public ResponseEntity<?> createCourse(@RequestBody CourseRequest request) {
+        System.out.println(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createCourse(request));
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> updateCourseStatus(@PathVariable Long id, @RequestBody AdminCourseUpdateRequest request) {
+    public ResponseEntity<?> updateCourseStatus(@PathVariable("id") Long id, @RequestBody AdminCourseUpdateRequest request) {
+        System.out.println("Id:  " + id + "Req: " + request);
         return ResponseEntity.ok(service.updateCourseStatus(id, request));
     }
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'INSTRUCTOR')")
-    public ResponseEntity<?> deleteById(@PathVariable Long id) {
-        // Note: Add logic in the service to ensure an instructor can only delete their own course
+    public ResponseEntity<?> deleteById(@PathVariable("id") Long id) {
         service.deleteById(id);
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

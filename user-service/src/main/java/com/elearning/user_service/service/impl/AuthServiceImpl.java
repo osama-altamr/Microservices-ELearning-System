@@ -37,8 +37,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         User user = authenticate(request);
-
-        String jwt = jwtService.generateToken(user);
+        
+        String jwt = jwtService.generateToken(user, user.getId());
 
         String refreshToken = jwtService.generateRefreshToken(user);
 
@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepo.findByEmail(username).orElseThrow();
 
         if (jwtService.isTokenValid(request.getRefreshToken(), user)) {
-            String jwt = jwtService.generateToken(user);
+            String jwt = jwtService.generateToken(user, user.getId());
             return RefreshTokenResponse.builder()
                     .token(jwt)
                     .refreshToken(request.getRefreshToken())

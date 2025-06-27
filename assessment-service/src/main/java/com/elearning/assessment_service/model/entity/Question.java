@@ -25,5 +25,6 @@ public class Question {
     private String questionText;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Option> options = new ArrayList<>();
 }

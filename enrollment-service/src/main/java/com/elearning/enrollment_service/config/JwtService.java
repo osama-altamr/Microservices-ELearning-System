@@ -45,6 +45,14 @@ public class JwtService {
         return buildToken(new HashMap<>(), userDetails,refreshExpirationTime);
     }
 
+    public boolean isTokenSignatureValid(String token) {
+        try {
+            extractAllClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public String generateToken(HashMap<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails,expirationTime);
@@ -69,7 +77,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
-    private Claims extractAllClaims(String token) {
+    Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()

@@ -8,11 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -26,8 +23,7 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
-    
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -42,9 +38,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-         
+            final String jwt = authHeader.substring(7);
+            
+            System.out.println(jwt);
+            final String userEmail = jwtService.extractUsername(jwt);
+            System.out.println(userEmail);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // لا نتصل بقاعدة البيانات، بل نتحقق من صحة التوقيع وتاريخ الانتهاء فقط
+                if (jwtService.isTokenSignatureValid(jwt)) { 
+                    
+                    // استخراج كل الـ claims من التوكن
+                    Claims claims = jwtService.extractAllClaims(jwt);
+            System.out.println(claims);
+                    
+                    // استخراج الصلاحيات (roles) من الـ claims
+                    @SuppressWarnings("unchecked")
+                    List<String> roles = claims.get("roles", List.class);
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+
+                    // استخراج ID المستخدم
+                    Long userId = claims.get("userId", Long.class);
+
+                    System.out.println(userId + " User Id from Claims");
+                    // إنشاء كائن المصادقة
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userId.toString(), 
+                            null,
+                            authorities // تمرير الصلاحيات المستخرجة من التوكن
+                    );
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    
+                    // تحديث سياق الأمان
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
         } catch (Exception e) {
-            // يمكن معالجة الأخطاء هنا أو تركها للـ Exception Handler
+            System.out.println("Errror JWT Auth Filter");
+            // في حالة وجود أي خطأ في التوكن (منتهي الصلاحية، توقيع خاطئ)، يتم مسح سياق الأمان
             SecurityContextHolder.clearContext();
         }
 

@@ -1,7 +1,6 @@
 package com.elearning.user_service.conroller;
 
 import com.elearning.user_service.model.dto.request.AdminRequest;
-import com.elearning.user_service.model.dto.request.UserRequest;
 import com.elearning.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

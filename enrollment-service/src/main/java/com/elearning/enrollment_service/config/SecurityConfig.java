@@ -27,11 +27,10 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // السماح لأي شخص باستعراض الدورات المعتمدة
-                        .requestMatchers(HttpMethod.GET, "/api/v1/courses", "/api/v1/courses/{id}").permitAll()
-                        // السماح بالوصول لواجهة Swagger
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/enrollments/status").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",
+                                "/swagger-ui/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()

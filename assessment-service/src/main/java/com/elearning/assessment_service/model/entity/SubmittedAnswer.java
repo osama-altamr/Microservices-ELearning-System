@@ -2,8 +2,6 @@ package com.elearning.assessment_service.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Setter
 @Getter
@@ -11,19 +9,20 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "quizzes")
-public class Quiz {
+@Table(name = "submitted_answers")
+public class SubmittedAnswer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long courseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submission_id", nullable = false)
+    private Submission submission;
 
     @Column(nullable = false)
-    private String title;
+    private Long questionId;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Question> questions = new ArrayList<>();
+    @Column(nullable = false)
+    private Long selectedOptionId;
 }

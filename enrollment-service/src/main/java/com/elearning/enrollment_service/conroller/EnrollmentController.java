@@ -1,6 +1,7 @@
 package com.elearning.enrollment_service.conroller;
 
 import com.elearning.enrollment_service.model.dto.request.EnrollmentRequest;
+import com.elearning.enrollment_service.model.dto.request.UpdateEnrollmentStatusRequest;
 import com.elearning.enrollment_service.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,14 +22,18 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createEnrollment(request));
     }
 
+    @PutMapping("/enrollments/status")
+    public ResponseEntity<Void> updateStatus(@RequestBody UpdateEnrollmentStatusRequest request) {
+        service.updateEnrollmentStatus(request);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/enrollments/my-enrollments")
     @PreAuthorize("hasAuthority('LEARNER')")
     public ResponseEntity<?> getMyEnrollments() {
         return ResponseEntity.ok(service.findMyEnrollments());
     }
 
-    // Endpoint for an ADMIN to get enrollments for a specific user.
-    // This matches your requirement: GET /api/v1/users/{userId}/enrollments
     @GetMapping("/users/{userId}/enrollments")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getEnrollmentsByUserId(@PathVariable Long userId) {
