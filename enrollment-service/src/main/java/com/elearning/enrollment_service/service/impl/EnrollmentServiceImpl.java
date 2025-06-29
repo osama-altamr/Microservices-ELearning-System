@@ -1,5 +1,6 @@
 package com.elearning.enrollment_service.service.impl;
 
+import com.elearning.enrollment_service.model.dto.client.response.CourseResponse;
 import com.elearning.enrollment_service.model.dto.request.EnrollmentRequest;
 import com.elearning.enrollment_service.model.dto.request.UpdateEnrollmentStatusRequest;
 import com.elearning.enrollment_service.model.dto.response.EnrollmentResponse;
@@ -40,7 +41,7 @@ public void updateEnrollmentStatus(UpdateEnrollmentStatusRequest request) {
 }
 
     @Override
-    public EnrollmentResponse createEnrollment(EnrollmentRequest request) {
+    public EnrollmentResponse createEnrollment(EnrollmentRequest request, CourseResponse course) {
         Long userId = getCurrentUserId();
 
         // Check if the user is already enrolled
@@ -48,10 +49,12 @@ public void updateEnrollmentStatus(UpdateEnrollmentStatusRequest request) {
             throw new EntityExistsException("User is already enrolled in this course.");
         });
 
+        System.out.println(course);
         Enrollment enrollment = Enrollment.builder()
                 .userId(userId)
                 .courseId(request.getCourseId())
                 .status(EnrollmentStatus.IN_PROGRESS)
+                .price(course.getPrice())
                 .build();
         
         Enrollment savedEnrollment = repo.save(enrollment);

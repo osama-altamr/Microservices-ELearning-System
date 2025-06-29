@@ -1,10 +1,15 @@
 package com.elearning.enrollment_service.conroller;
 
+import com.elearning.enrollment_service.client.CourseServiceClient;
+import com.elearning.enrollment_service.model.dto.client.response.CourseResponse;
 import com.elearning.enrollment_service.model.dto.request.EnrollmentRequest;
 import com.elearning.enrollment_service.model.dto.request.UpdateEnrollmentStatusRequest;
 import com.elearning.enrollment_service.service.EnrollmentService;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +22,23 @@ import org.springframework.web.bind.annotation.*;
 public class EnrollmentController {
 
     private final EnrollmentService service;
+ private final CourseServiceClient courseServiceClient;
 
     @PostMapping("/enrollments")
     @PreAuthorize("hasAuthority('LEARNER')")
     public ResponseEntity<?> createEnrollment(@RequestBody EnrollmentRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createEnrollment(request));
+        Optional<CourseResponse> courseOptional = courseServiceClient.getCourseById(request.getCourseId());
+           
+        if (courseOptional.isEmpty()) {
+            throw new EntityNotFoundException("Course with ID " + request.getCourseId() + " not found or course service is unavailable.");
+        }
+        CourseResponse course = courseOptional.get();
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createEnrollment(request, course));
     }
 
     @PutMapping("/enrollments/status")
     public ResponseEntity<Void> updateStatus(@RequestBody UpdateEnrollmentStatusRequest request) throws InterruptedException {
-    // --- إضافة تأخير لمحاكاة خدمة بطيئة ---
     System.out.println("ENROLLMENT-SERVICE: Received update request, simulating delay...");
-    // تأخير لمدة 5 ثواني
     TimeUnit.SECONDS.sleep(5); 
     System.out.println("ENROLLMENT-SERVICE: Delay finished. Processing request.");
 

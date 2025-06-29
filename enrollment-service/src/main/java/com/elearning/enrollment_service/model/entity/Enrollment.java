@@ -4,6 +4,8 @@ import com.elearning.enrollment_service.model.enums.EnrollmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Setter
@@ -31,6 +33,9 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EnrollmentStatus status;
+
+    @Column(nullable = false)
+    private BigDecimal price;
 
     @CreationTimestamp
     @Column(updatable = false)

@@ -31,9 +31,7 @@ public class EnrollmentServiceClient {
         log.info("Successfully requested enrollment status update.");
     }
 
-    // دالة الـ fallback تبقى هنا أيضًا
     public void updateEnrollmentFallback(Long userId, Long courseId, Throwable throwable) {
-        // استخدام الـ logger أفضل من System.out.println
         log.error(
             "Enrollment service is down or timed out. Fallback executed for user: {}. Error: {}", 
             userId, 

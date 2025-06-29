@@ -3,23 +3,23 @@ server:
 
 spring:
   application:
-    name: ASSESSMENT-SERVICE # اسم الخدمة كما سيظهر في Eureka
+    name: ASSESSMENT-SERVICE 
   
   datasource:
     url: jdbc:postgresql://localhost:5432/assessment_db
     username: postgres
-    password: password # استبدل بكلمة المرور الصحيحة
+    password: password
     driver-class-name: org.postgresql.Driver
   
   jpa:
     hibernate:
-      ddl-auto: update # لإنشاء/تحديث الجداول تلقائيًا
+      ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect # تحديد لهجة قاعدة البيانات
+        dialect: org.hibernate.dialect.PostgreSQLDialect 
         globally_quoted_identifiers: true
         globally_quoted_identifiers_skip_column_definitions: true
-    show-sql: true # إظهار استعلامات SQL في الـ console (مفيد للتصحيح)
+    show-sql: true 
 
 eureka:
   client:
