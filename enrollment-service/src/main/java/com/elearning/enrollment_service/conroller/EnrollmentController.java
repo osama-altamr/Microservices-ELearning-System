@@ -4,6 +4,8 @@ import com.elearning.enrollment_service.model.dto.request.EnrollmentRequest;
 import com.elearning.enrollment_service.model.dto.request.UpdateEnrollmentStatusRequest;
 import com.elearning.enrollment_service.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.TimeUnit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +25,13 @@ public class EnrollmentController {
     }
 
     @PutMapping("/enrollments/status")
-    public ResponseEntity<Void> updateStatus(@RequestBody UpdateEnrollmentStatusRequest request) {
+    public ResponseEntity<Void> updateStatus(@RequestBody UpdateEnrollmentStatusRequest request) throws InterruptedException {
+    // --- إضافة تأخير لمحاكاة خدمة بطيئة ---
+    System.out.println("ENROLLMENT-SERVICE: Received update request, simulating delay...");
+    // تأخير لمدة 5 ثواني
+    TimeUnit.SECONDS.sleep(5); 
+    System.out.println("ENROLLMENT-SERVICE: Delay finished. Processing request.");
+
         service.updateEnrollmentStatus(request);
         return ResponseEntity.ok().build();
     }
@@ -31,6 +39,7 @@ public class EnrollmentController {
     @GetMapping("/enrollments/my-enrollments")
     @PreAuthorize("hasAuthority('LEARNER')")
     public ResponseEntity<?> getMyEnrollments() {
+            System.out.println("ENROLLMENT-SERVICE: Received update request, simulating delay...");
         return ResponseEntity.ok(service.findMyEnrollments());
     }
 

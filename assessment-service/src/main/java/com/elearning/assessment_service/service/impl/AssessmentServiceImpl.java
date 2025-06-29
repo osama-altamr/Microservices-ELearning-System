@@ -3,10 +3,11 @@ package com.elearning.assessment_service.service.impl;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.elearning.assessment_service.model.mapper.QuizMapper;
+import com.elearning.assessment_service.client.EnrollmentServiceClient;
 import com.elearning.assessment_service.model.dto.client.UpdateEnrollmentStatusRequest;
 import com.elearning.assessment_service.model.dto.request.AnswerRequest;
 import com.elearning.assessment_service.model.dto.request.OptionRequest;
@@ -30,10 +31,12 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AssessmentServiceImpl implements AssessmentService {
 
     private final QuizRepo quizRepo;
@@ -41,6 +44,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final QuizMapper quizMapper;
 
     private final RestTemplate restTemplate;
+    private final EnrollmentServiceClient enrollmentServiceClient;
 
   @Override
     @Transactional 
@@ -131,20 +135,13 @@ public class AssessmentServiceImpl implements AssessmentService {
 
     submission.setScore(score);
     submission.setStatus(status);
-
-    if(status == SubmissionStatus.PASSED){
-                        UpdateEnrollmentStatusRequest updateRequest = UpdateEnrollmentStatusRequest.builder()
-                        .userId(userId)
-                        .courseId(quiz.getCourseId())
-                        .newStatus("COMPLETED")
-                        .build();
-                        
-                        System.out.println(updateRequest);
-        restTemplate.put(
-            "http://ENROLLMENT-SERVICE/api/v1/enrollments/status",
-            updateRequest
-        );
+    if (status == SubmissionStatus.PASSED) {
+        System.out.println("Update Enrollment Status");
+        enrollmentServiceClient.updateEnrollmentStatus(userId, quiz.getCourseId());
     }
+    
+    System.out.println("After Update Enrollment Status");
+
     Submission savedSubmission = submissionRepo.save(submission);
 
     SubmissionResponse response = new SubmissionResponse();
@@ -158,6 +155,24 @@ public class AssessmentServiceImpl implements AssessmentService {
  return response;   
     }
 
+    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollmentUpdateFallback")
+    public void updateEnrollment(Long userId, Long courseId) {
+        UpdateEnrollmentStatusRequest updateRequest = UpdateEnrollmentStatusRequest.builder()
+                .userId(userId)
+                .courseId(courseId)
+                .newStatus("COMPLETED")
+                .build();
+
+        restTemplate.put(
+            "http://ENROLLMENT-SERVICE/api/v1/enrollments/status",
+            updateRequest
+        );
+    }
+
+    public void enrollmentUpdateFallback(Long userId, Long courseId, Throwable throwable) {
+        System.out.println("Enrollment service is down or timed out. Fallback executed for user: {}" + userId +  throwable);
+    }
+    
     private Long getCurrentUserId() {
         String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
         return Long.parseLong(userIdStr);

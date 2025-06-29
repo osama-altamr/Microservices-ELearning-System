@@ -1,0 +1,60 @@
+server:
+  port: 8084 # منفذ خدمة التقييمات
+
+spring:
+  application:
+    name: ASSESSMENT-SERVICE # اسم الخدمة كما سيظهر في Eureka
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/assessment_db
+    username: postgres
+    password: password # استبدل بكلمة المرور الصحيحة
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update # لإنشاء/تحديث الجداول تلقائيًا
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # تحديد لهجة قاعدة البيانات
+        globally_quoted_identifiers: true
+        globally_quoted_identifiers_skip_column_definitions: true
+    show-sql: true # إظهار استعلامات SQL في الـ console (مفيد للتصحيح)
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+security:
+  jwt:
+    secret-key: ee270d5a96c570ac9cf0ad3a546f346636962580271d2edfbf004de5f585c3d5
+    expiration-time: 86400000 # 24 hours
+    refresh:
+      expiration-time: 2592000000 # 30 days
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      # هذا هو الاسم الذي يجب أن يطابق الاسم المستخدم في تعليق @CircuitBreaker
+      # في مثالنا: @CircuitBreaker(name = "enrollmentService", ...)
+      enrollmentService: 
+        # عتبة معدل الفشل: إذا فشل 50% من الطلبات، تُفتح الدائرة.
+        failure-rate-threshold: 50 
+        
+        # أقل عدد من الطلبات التي يجب تقييمها قبل أن يبدأ قاطع الدائرة في حساب معدل الفشل.
+        minimum-number-of-calls: 5 
+        
+        # مدة بقاء الدائرة مفتوحة (بالثواني) قبل الانتقال إلى حالة "نصف مفتوحة".
+        wait-duration-in-open-state: 30s 
+        
+        # عدد الطلبات المسموح بها في حالة "نصف مفتوحة" لاختبار إذا عادت الخدمة للعمل.
+        permitted-number-of-calls-in-half-open-state: 3 
+        
+        sliding-window-type: COUNT_BASED
+        
+        sliding-window-size: 10
+        
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException$NotFound
+          - jakarta.persistence.EntityNotFoundException
